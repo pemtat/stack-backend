@@ -7,7 +7,6 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 1. เพิ่มบรรทัดนี้เพื่อเปิด CORS
   app.enableCors();
 
   app.useGlobalPipes(
@@ -18,15 +17,15 @@ async function bootstrap() {
     }),
   );
 
-  //
   app.useGlobalFilters(new PrismaClientExceptionFilter());
 
-  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalInterceptors(
+    new TransformInterceptor(),
+    new ClassSerializerInterceptor(app.get(Reflector)),
+  );
 
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-
-  // 2. แก้ไขบรรทัดนี้ให้ระบุ '0.0.0.0'
   const port = process.env.PORT ?? 3000;
   await app.listen(port, '0.0.0.0');
 }
+
 void bootstrap();

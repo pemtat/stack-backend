@@ -1,13 +1,3 @@
-import { IsString, MinLength } from 'class-validator';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
-export class RegisterDto {
-  @IsString()
-  username: string;
-
-  @IsString()
-  @MinLength(6)
-  password: string;
-
-  @IsString()
-  fullName: string;
-}
+export class RegisterDto extends CreateUserDto {}

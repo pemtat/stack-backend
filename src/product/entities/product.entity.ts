@@ -1,4 +1,4 @@
-import { Exclude, Transform } from 'class-transformer';
+import { Transform } from 'class-transformer';
 
 export class ProductEntity {
   id: number;
@@ -8,7 +8,8 @@ export class ProductEntity {
   price: number;
   stock: number;
   unit: string;
-  imageUrl?: string | null;
+  imageUrl: string | null;
+  categoryId: number | null;
   createdAt: Date;
 
   constructor(partial: Partial<ProductEntity>) {

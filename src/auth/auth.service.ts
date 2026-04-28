@@ -8,29 +8,29 @@ import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { UserEntity } from 'src/users/entities/user.entity';
+import { UserEntity } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService,
-    private configService: ConfigService,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async register(dto: RegisterDto) {
-    const userExists = await this.usersService.findByUsername(dto.username);
-    if (userExists) throw new BadRequestException('User already exists!');
+    const existing = await this.usersService.findOneForAuth(dto.username);
+    if (existing) throw new BadRequestException('User already exists');
 
     const newUser = await this.usersService.create(dto);
     return new UserEntity(newUser);
   }
 
-  async login(username: string, pass: string) {
+  async login(username: string, password: string) {
     const user = await this.usersService.findOneForAuth(username);
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
-    const isMatch = await bcrypt.compare(pass, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
     const payload = { sub: user.id, username: user.username, role: user.role };
@@ -55,24 +55,20 @@ export class AuthService {
       });
 
       const user = await this.usersService.findOneForAuth(payload.username);
-
       if (!user || !user.isActive) {
         throw new UnauthorizedException('User is inactive or not found');
       }
 
-      const newPayload = {
-        sub: user.id,
-        username: user.username,
-        role: user.role,
-      };
+      const newPayload = { sub: user.id, username: user.username, role: user.role };
 
       return {
         access_token: await this.jwtService.signAsync(newPayload, {
           secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+          expiresIn: '15m',
         }),
         refresh_token: token,
       };
-    } catch (e) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
   }
