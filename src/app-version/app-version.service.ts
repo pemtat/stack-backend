@@ -12,11 +12,12 @@ export class AppVersionService {
   ) {}
 
   private getStoreUrl(platform: string): string | null {
+    const normalizedPlatform = platform.toLowerCase();
     const storeUrls: Record<string, string> = {
       ios: this.configService.get<string>('APP_STORE_URL', ''),
       android: this.configService.get<string>('PLAY_STORE_URL', ''),
     };
-    return storeUrls[platform] || null;
+    return storeUrls[normalizedPlatform] || null;
   }
 
   async checkVersion(query: CheckVersionDto) {
