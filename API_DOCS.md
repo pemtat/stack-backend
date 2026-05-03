@@ -51,7 +51,8 @@ Authorization: Bearer <access_token>
     "username": "john_doe",
     "fullName": "John Doe",
     "phoneNumber": null,
-    "role": "user",
+    "profileImage": null,
+    "role": "ADMIN",
     "isActive": true,
     "createdAt": "2026-04-29T10:00:00.000Z",
     "updatedAt": "2026-04-29T10:00:00.000Z"
@@ -87,7 +88,8 @@ Authorization: Bearer <access_token>
       "username": "john_doe",
       "fullName": "John Doe",
       "phoneNumber": null,
-      "role": "user",
+      "profileImage": null,
+      "role": "ADMIN",
       "isActive": true,
       "createdAt": "2026-04-29T10:00:00.000Z",
       "updatedAt": "2026-04-29T10:00:00.000Z"
@@ -142,11 +144,153 @@ Authorization: Bearer <access_token>
     "username": "john_doe",
     "fullName": "John Doe",
     "phoneNumber": null,
-    "role": "user",
+    "profileImage": null,
+    "role": "ADMIN",
     "isActive": true,
     "createdAt": "2026-04-29T10:00:00.000Z",
     "updatedAt": "2026-04-29T10:00:00.000Z"
   }
+}
+```
+
+---
+
+## Users
+
+**ทุก endpoint ใน `/users` ต้องใช้ token**
+
+---
+
+### PATCH `/users/profile` — แก้ไขโปรไฟล์
+
+**Request Body:** (ส่งเฉพาะ field ที่ต้องการแก้ไข)
+```json
+{
+  "fullName": "New Name",
+  "phoneNumber": "0812345678",
+  "profileImage": "https://example.com/avatar.jpg"
+}
+```
+
+| Field | Type | Required | หมายเหตุ |
+|-------|------|----------|----------|
+| fullName | string | ❌ | ชื่อ-นามสกุล |
+| phoneNumber | string | ❌ | เบอร์โทรศัพท์ |
+| profileImage | string (URL) | ❌ | URL รูปโปรไฟล์ (ต้องเป็น URL ที่ถูกต้อง) |
+
+**Response (200):**
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "uuid-string",
+    "username": "john_doe",
+    "fullName": "New Name",
+    "phoneNumber": "0812345678",
+    "profileImage": "https://example.com/avatar.jpg",
+    "role": "ADMIN",
+    "isActive": true,
+    "createdAt": "2026-04-29T10:00:00.000Z",
+    "updatedAt": "2026-05-03T10:00:00.000Z"
+  }
+}
+```
+
+---
+
+### PATCH `/users/change-password` — เปลี่ยนรหัสผ่าน
+
+**Request Body:**
+```json
+{
+  "oldPassword": "secret123",
+  "newPassword": "newSecret456"
+}
+```
+
+| Field | Type | Required | หมายเหตุ |
+|-------|------|----------|----------|
+| oldPassword | string | ✅ | รหัสผ่านปัจจุบัน |
+| newPassword | string | ✅ | รหัสผ่านใหม่ (ขั้นต่ำ 6 ตัวอักษร) |
+
+**Response (200):**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Password updated successfully"
+  }
+}
+```
+
+**Error (400):** รหัสผ่านเดิมไม่ถูกต้อง
+
+---
+
+### POST `/users/device` — ลงทะเบียน/อัปเดตอุปกรณ์
+
+เรียกตอนแอปเปิดหรือหลัง login เพื่อบันทึกข้อมูลอุปกรณ์ ถ้า user+platform เคยมีแล้วจะอัปเดตข้อมูลเดิม (upsert)
+
+**Request Body:**
+```json
+{
+  "platform": "android",
+  "appVersion": "2.1.0",
+  "buildNumber": 15,
+  "deviceModel": "Samsung Galaxy S24",
+  "pushToken": "fcm-token-string"
+}
+```
+
+| Field | Type | Required | หมายเหตุ |
+|-------|------|----------|----------|
+| platform | string | ✅ | `ios` หรือ `android` |
+| appVersion | string | ❌ | เลขเวอร์ชั่นแอป |
+| buildNumber | number | ❌ | หมายเลข build |
+| deviceModel | string | ❌ | รุ่นอุปกรณ์ |
+| pushToken | string | ❌ | FCM/APNs token สำหรับ push notification |
+
+**Response (200):**
+```json
+{
+  "status": "success",
+  "data": {
+    "id": 1,
+    "userId": "uuid-string",
+    "platform": "android",
+    "appVersion": "2.1.0",
+    "buildNumber": 15,
+    "deviceModel": "Samsung Galaxy S24",
+    "pushToken": "fcm-token-string",
+    "lastActiveAt": "2026-05-03T10:00:00.000Z",
+    "createdAt": "2026-05-03T10:00:00.000Z",
+    "updatedAt": "2026-05-03T10:00:00.000Z"
+  }
+}
+```
+
+---
+
+### GET `/users/devices` — ดูอุปกรณ์ทั้งหมดของตัวเอง
+
+**Response (200):**
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "id": 1,
+      "userId": "uuid-string",
+      "platform": "android",
+      "appVersion": "2.1.0",
+      "buildNumber": 15,
+      "deviceModel": "Samsung Galaxy S24",
+      "pushToken": "fcm-token-string",
+      "lastActiveAt": "2026-05-03T10:00:00.000Z",
+      "createdAt": "2026-05-03T10:00:00.000Z",
+      "updatedAt": "2026-05-03T10:00:00.000Z"
+    }
+  ]
 }
 ```
 
@@ -361,78 +505,6 @@ DELETE /products/10
 
 ---
 
-## User Profile
-
-**ทุก endpoint ใน `/users` ต้องใช้ token**
-
----
-
-### PATCH `/users/profile` — แก้ไขโปรไฟล์
-
-**Request Body:** (ส่งเฉพาะ field ที่ต้องการแก้ไข)
-```json
-{
-  "fullName": "New Name",
-  "phoneNumber": "0812345678",
-  "profileImage": "https://example.com/avatar.jpg"
-}
-```
-
-| Field | Type | Required | หมายเหตุ |
-|-------|------|----------|----------|
-| fullName | string | ❌ | ชื่อ-นามสกุล |
-| phoneNumber | string | ❌ | เบอร์โทรศัพท์ |
-| profileImage | string | ❌ | URL รูปโปรไฟล์ |
-
-**Response (200):**
-```json
-{
-  "status": "success",
-  "data": {
-    "id": "uuid-string",
-    "username": "john_doe",
-    "fullName": "New Name",
-    "phoneNumber": "0812345678",
-    "profileImage": "https://example.com/avatar.jpg",
-    "role": "user",
-    "isActive": true,
-    "createdAt": "2026-04-29T10:00:00.000Z",
-    "updatedAt": "2026-05-03T10:00:00.000Z"
-  }
-}
-```
-
----
-
-### PATCH `/users/change-password` — เปลี่ยนรหัสผ่าน
-
-**Request Body:**
-```json
-{
-  "oldPassword": "secret123",
-  "newPassword": "newSecret456"
-}
-```
-
-| Field | Type | Required | หมายเหตุ |
-|-------|------|----------|----------|
-| oldPassword | string | ✅ | รหัสผ่านปัจจุบัน |
-| newPassword | string | ✅ | รหัสผ่านใหม่ (ขั้นต่ำ 6 ตัวอักษร) |
-
-**Response (200):**
-```json
-{
-  "status": "success",
-  "data": {
-    "message": "Password updated successfully"
-  }
-}
-```
-
-**Error (400):** รหัสผ่านเดิมไม่ถูกต้อง
-
----
-
 ## App Version
 
 ---
@@ -536,80 +608,7 @@ GET /app-version/latest?platform=ios
 
 > ⚠️ ถ้า `platform` มีอยู่แล้วจะอัปเดตข้อมูลเดิม (upsert)
 
----
-
-## User Device
-
-**ทุก endpoint ต้องใช้ token**
-
----
-
-### POST `/users/device` — ลงทะเบียน/อัปเดตอุปกรณ์
-
-เรียกตอนแอปเปิดหรือหลัง login เพื่อบันทึกข้อมูลอุปกรณ์ ถ้า user+platform เคยมีแล้วจะอัปเดตข้อมูลเดิม (upsert)
-
-**Request Body:**
-```json
-{
-  "platform": "android",
-  "appVersion": "2.1.0",
-  "buildNumber": 15,
-  "deviceModel": "Samsung Galaxy S24",
-  "pushToken": "fcm-token-string"
-}
-```
-
-| Field | Type | Required | หมายเหตุ |
-|-------|------|----------|----------|
-| platform | string | ✅ | `ios` หรือ `android` |
-| appVersion | string | ❌ | เลขเวอร์ชั่นแอป |
-| buildNumber | number | ❌ | หมายเลข build |
-| deviceModel | string | ❌ | รุ่นอุปกรณ์ |
-| pushToken | string | ❌ | FCM/APNs token สำหรับ push notification |
-
-**Response (200):**
-```json
-{
-  "status": "success",
-  "data": {
-    "id": 1,
-    "userId": "uuid-string",
-    "platform": "android",
-    "appVersion": "2.1.0",
-    "buildNumber": 15,
-    "deviceModel": "Samsung Galaxy S24",
-    "pushToken": "fcm-token-string",
-    "lastActiveAt": "2026-05-03T10:00:00.000Z",
-    "createdAt": "2026-05-03T10:00:00.000Z",
-    "updatedAt": "2026-05-03T10:00:00.000Z"
-  }
-}
-```
-
----
-
-### GET `/users/devices` — ดูอุปกรณ์ทั้งหมดของตัวเอง
-
-**Response (200):**
-```json
-{
-  "status": "success",
-  "data": [
-    {
-      "id": 1,
-      "userId": "uuid-string",
-      "platform": "android",
-      "appVersion": "2.1.0",
-      "buildNumber": 15,
-      "deviceModel": "Samsung Galaxy S24",
-      "pushToken": "fcm-token-string",
-      "lastActiveAt": "2026-05-03T10:00:00.000Z",
-      "createdAt": "2026-05-03T10:00:00.000Z",
-      "updatedAt": "2026-05-03T10:00:00.000Z"
-    }
-  ]
-}
-```
+> 💡 `storeUrl` ไม่ได้เก็บใน DB แต่อ่านจาก Environment Variables (`APP_STORE_URL`, `PLAY_STORE_URL`)
 
 ---
 
