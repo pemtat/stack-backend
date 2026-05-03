@@ -95,7 +95,21 @@ async function main() {
       create: product,
     });
   }
-  console.log('Seed data (Admin + Catalog) created successfully!');
+
+  const appVersions = [
+    { platform: 'ios', version: '1.0.0', buildNumber: 1 },
+    { platform: 'android', version: '1.0.0', buildNumber: 1 },
+  ];
+
+  for (const ver of appVersions) {
+    await prisma.appVersion.upsert({
+      where: { platform: ver.platform },
+      update: {},
+      create: ver,
+    });
+  }
+
+  console.log('Seed data (Admin + Catalog + AppVersion) created successfully!');
 }
 
 main()
