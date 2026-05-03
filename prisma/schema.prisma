@@ -13,16 +13,17 @@ enum UserRole {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  username     String   @unique
+  id           String       @id @default(uuid())
+  username     String       @unique
   password     String
   fullName     String?
   phoneNumber  String?
   profileImage String?
-  role         UserRole @default(ADMIN)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role         UserRole     @default(ADMIN)
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  devices      UserDevice[]
 
   @@map("users")
 }
@@ -65,4 +66,22 @@ model AppVersion {
   updatedAt    DateTime @updatedAt
 
   @@map("app_versions")
+}
+
+model UserDevice {
+  id           Int      @id @default(autoincrement())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform     String   // "ios" or "android"
+  appVersion   String?
+  buildNumber  Int?
+  deviceModel  String?
+  pushToken    String?
+  lastActiveAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, platform])
+  @@index([userId])
+  @@map("user_devices")
 }

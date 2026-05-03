@@ -4,6 +4,7 @@ import { UserEntity } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { RegisterDeviceDto } from './dto/register-device.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -56,5 +57,35 @@ export class UsersService {
     });
 
     return { message: 'Password updated successfully' };
+  }
+
+  async registerDevice(userId: string, dto: RegisterDeviceDto) {
+    return this.prisma.userDevice.upsert({
+      where: {
+        userId_platform: { userId, platform: dto.platform },
+      },
+      update: {
+        appVersion: dto.appVersion,
+        buildNumber: dto.buildNumber,
+        deviceModel: dto.deviceModel,
+        pushToken: dto.pushToken,
+        lastActiveAt: new Date(),
+      },
+      create: {
+        userId,
+        platform: dto.platform,
+        appVersion: dto.appVersion,
+        buildNumber: dto.buildNumber,
+        deviceModel: dto.deviceModel,
+        pushToken: dto.pushToken,
+      },
+    });
+  }
+
+  async getDevices(userId: string) {
+    return this.prisma.userDevice.findMany({
+      where: { userId },
+      orderBy: { lastActiveAt: 'desc' },
+    });
   }
 }

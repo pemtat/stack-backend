@@ -536,6 +536,81 @@ GET /app-version/latest?platform=ios
 
 ---
 
+## User Device
+
+**ทุก endpoint ต้องใช้ token**
+
+---
+
+### POST `/users/device` — ลงทะเบียน/อัปเดตอุปกรณ์
+
+เรียกตอนแอปเปิดหรือหลัง login เพื่อบันทึกข้อมูลอุปกรณ์ ถ้า user+platform เคยมีแล้วจะอัปเดตข้อมูลเดิม (upsert)
+
+**Request Body:**
+```json
+{
+  "platform": "android",
+  "appVersion": "2.1.0",
+  "buildNumber": 15,
+  "deviceModel": "Samsung Galaxy S24",
+  "pushToken": "fcm-token-string"
+}
+```
+
+| Field | Type | Required | หมายเหตุ |
+|-------|------|----------|----------|
+| platform | string | ✅ | `ios` หรือ `android` |
+| appVersion | string | ❌ | เลขเวอร์ชั่นแอป |
+| buildNumber | number | ❌ | หมายเลข build |
+| deviceModel | string | ❌ | รุ่นอุปกรณ์ |
+| pushToken | string | ❌ | FCM/APNs token สำหรับ push notification |
+
+**Response (200):**
+```json
+{
+  "status": "success",
+  "data": {
+    "id": 1,
+    "userId": "uuid-string",
+    "platform": "android",
+    "appVersion": "2.1.0",
+    "buildNumber": 15,
+    "deviceModel": "Samsung Galaxy S24",
+    "pushToken": "fcm-token-string",
+    "lastActiveAt": "2026-05-03T10:00:00.000Z",
+    "createdAt": "2026-05-03T10:00:00.000Z",
+    "updatedAt": "2026-05-03T10:00:00.000Z"
+  }
+}
+```
+
+---
+
+### GET `/users/devices` — ดูอุปกรณ์ทั้งหมดของตัวเอง
+
+**Response (200):**
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "id": 1,
+      "userId": "uuid-string",
+      "platform": "android",
+      "appVersion": "2.1.0",
+      "buildNumber": 15,
+      "deviceModel": "Samsung Galaxy S24",
+      "pushToken": "fcm-token-string",
+      "lastActiveAt": "2026-05-03T10:00:00.000Z",
+      "createdAt": "2026-05-03T10:00:00.000Z",
+      "updatedAt": "2026-05-03T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
 ## Error Responses
 
 รูปแบบ error ทั่วไป:
@@ -566,6 +641,8 @@ GET /app-version/latest?platform=ios
 | GET | `/auth/me` | ✅ | ดูข้อมูลตัวเอง |
 | PATCH | `/users/profile` | ✅ | แก้ไขโปรไฟล์ |
 | PATCH | `/users/change-password` | ✅ | เปลี่ยนรหัสผ่าน |
+| POST | `/users/device` | ✅ | ลงทะเบียนอุปกรณ์ |
+| GET | `/users/devices` | ✅ | ดูอุปกรณ์ทั้งหมด |
 | GET | `/products` | ✅ | รายการสินค้า (+ pagination + search) |
 | GET | `/products/:id` | ✅ | ดูสินค้าชิ้นเดียว |
 | POST | `/products` | ✅ | เพิ่มสินค้า |
@@ -574,4 +651,3 @@ GET /app-version/latest?platform=ios
 | GET | `/app-version/check` | ❌ | ตรวจสอบเวอร์ชั่นแอป |
 | GET | `/app-version/latest` | ❌ | ดูเวอร์ชั่นล่าสุด |
 | POST | `/app-version` | ✅ | ตั้งค่าเวอร์ชั่นแอป |
-
