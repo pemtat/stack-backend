@@ -5,6 +5,7 @@ export class UserEntity {
   username: string;
   fullName: string | null;
   phoneNumber: string | null;
+  profileImage: string | null;
   role: string;
   isActive: boolean;
   createdAt: Date;
