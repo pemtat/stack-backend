@@ -1,11 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'prisma/prisma.service';
 import { CheckVersionDto } from './dto/check-version.dto';
 import { UpsertVersionDto } from './dto/upsert-version.dto';
 
 @Injectable()
 export class AppVersionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
+
+  private getStoreUrl(platform: string): string | null {
+    const storeUrls: Record<string, string> = {
+      ios: this.configService.get<string>('APP_STORE_URL', ''),
+      android: this.configService.get<string>('PLAY_STORE_URL', ''),
+    };
+    return storeUrls[platform] || null;
+  }
 
   async checkVersion(query: CheckVersionDto) {
     const latestVersion = await this.prisma.appVersion.findUnique({
@@ -17,13 +29,14 @@ export class AppVersionService {
     }
 
     const updateAvailable = query.buildNumber < latestVersion.buildNumber;
-    
+
     return {
       updateAvailable,
       forceUpdate: updateAvailable && latestVersion.forceUpdate,
       latestVersion: latestVersion.version,
       latestBuildNumber: latestVersion.buildNumber,
       releaseNotes: latestVersion.releaseNotes,
+      storeUrl: this.getStoreUrl(query.platform),
     };
   }
 
@@ -53,6 +66,9 @@ export class AppVersionService {
     if (!version) {
       throw new NotFoundException(`Platform ${platform} not found in version records`);
     }
-    return version;
+    return {
+      ...version,
+      storeUrl: this.getStoreUrl(platform),
+    };
   }
 }

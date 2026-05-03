@@ -462,7 +462,8 @@ GET /app-version/check?platform=android&buildNumber=10
     "forceUpdate": false,
     "latestVersion": "2.1.0",
     "latestBuildNumber": 15,
-    "releaseNotes": "Bug fixes and performance improvements"
+    "releaseNotes": "Bug fixes and performance improvements",
+    "storeUrl": "https://play.google.com/store/apps/details?id=your.package.name"
   }
 }
 ```
@@ -497,6 +498,7 @@ GET /app-version/latest?platform=ios
     "buildNumber": 15,
     "forceUpdate": false,
     "releaseNotes": "Bug fixes and performance improvements",
+    "storeUrl": "https://apps.apple.com/app/your-app-id",
     "createdAt": "2026-05-03T10:00:00.000Z",
     "updatedAt": "2026-05-03T10:00:00.000Z"
   }
