@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'prisma/prisma.service';
 import { CheckVersionDto } from './dto/check-version.dto';
 import { UpsertVersionDto } from './dto/upsert-version.dto';
+import { Platform } from '../common/constants/app.constants';
 
 @Injectable()
 export class AppVersionService {
@@ -14,8 +15,8 @@ export class AppVersionService {
   private getStoreUrl(platform: string): string | null {
     const normalizedPlatform = platform.toLowerCase();
     const storeUrls: Record<string, string> = {
-      ios: this.configService.get<string>('APP_STORE_URL', ''),
-      android: this.configService.get<string>('PLAY_STORE_URL', ''),
+      [Platform.IOS]: this.configService.get<string>('APP_STORE_URL', ''),
+      [Platform.ANDROID]: this.configService.get<string>('PLAY_STORE_URL', ''),
     };
     return storeUrls[normalizedPlatform] || null;
   }
@@ -26,7 +27,9 @@ export class AppVersionService {
     });
 
     if (!latestVersion) {
-      throw new NotFoundException(`Platform ${query.platform} not found in version records`);
+      throw new NotFoundException(
+        `Platform ${query.platform} not found in version records`,
+      );
     }
 
     const updateAvailable = query.buildNumber < latestVersion.buildNumber;
@@ -65,7 +68,9 @@ export class AppVersionService {
       where: { platform },
     });
     if (!version) {
-      throw new NotFoundException(`Platform ${platform} not found in version records`);
+      throw new NotFoundException(
+        `Platform ${platform} not found in version records`,
+      );
     }
     return {
       ...version,

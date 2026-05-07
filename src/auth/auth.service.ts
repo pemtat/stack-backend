@@ -9,6 +9,7 @@ import { RegisterDto } from './dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserEntity } from '../users/entities/user.entity';
+import { APP_CONSTANTS } from '../common/constants/app.constants';
 
 @Injectable()
 export class AuthService {
@@ -38,11 +39,11 @@ export class AuthService {
     return {
       access_token: await this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-        expiresIn: '15m',
+        expiresIn: APP_CONSTANTS.JWT.ACCESS_EXPIRES_IN,
       }),
       refresh_token: await this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: '7d',
+        expiresIn: APP_CONSTANTS.JWT.REFRESH_EXPIRES_IN,
       }),
       user: new UserEntity(user),
     };
@@ -59,12 +60,16 @@ export class AuthService {
         throw new UnauthorizedException('User is inactive or not found');
       }
 
-      const newPayload = { sub: user.id, username: user.username, role: user.role };
+      const newPayload = {
+        sub: user.id,
+        username: user.username,
+        role: user.role,
+      };
 
       return {
         access_token: await this.jwtService.signAsync(newPayload, {
           secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-          expiresIn: '15m',
+          expiresIn: APP_CONSTANTS.JWT.ACCESS_EXPIRES_IN,
         }),
         refresh_token: token,
       };

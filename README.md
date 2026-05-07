@@ -22,15 +22,22 @@ nest new nexus-backend
 pnpm start:dev
 ```
 
-## โครงสร้าง Project
+## โครงสร้าง Project (Clean Architecture)
 
 ```Plaintext
 src/
-├── auth/ # 🔐 ระบบ Login / JWT
-├── users/ # 👤 ระบบจัดการโปรไฟล์ผู้ใช้
-├── common/ # ⚙️ สิ่งที่ใช้ร่วมกัน (Interceptors, Guards, DTOs)
+├── app-version/ # 📱 ระบบจัดการเวอร์ชันแอป
+├── auth/        # 🔐 ระบบ Login / JWT / Guard
+├── product/     # 🛍️ ระบบจัดการสินค้า
+├── users/       # 👤 ระบบจัดการผู้ใช้และอุปกรณ์
+├── common/      # ⚙️ โค้ดกลางที่ใช้ร่วมกัน (Global)
+│   ├── constants/  # ค่าคงที่ (Constants/Enums) เช่น `APP_CONSTANTS`
+│   ├── filters/    # Exception Filters เช่น `PrismaClientExceptionFilter`
+│   ├── interceptors/ # Interceptors เช่น `TransformInterceptor`
+│   ├── interfaces/ # Interfaces มาตรฐาน เช่น `PaginatedResponse`
+│   └── utils/      # Utility functions เช่น `pagination.util.ts`
 ├── app.module.ts # 🧩 ศูนย์รวม Module ทั้งหมด
-└── main.dart # 🚀 จุดเริ่มรัน Server
+└── main.ts       # 🚀 จุดเริ่มรัน Server
 ```
 
 ## การติดตั้ง Dependencies เพิ่มเติม

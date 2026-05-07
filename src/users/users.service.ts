@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { UserEntity } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -6,6 +10,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { RegisterDeviceDto } from './dto/register-device.dto';
 import * as bcrypt from 'bcrypt';
+import { APP_CONSTANTS } from '../common/constants/app.constants';
 
 @Injectable()
 export class UsersService {
@@ -27,7 +32,10 @@ export class UsersService {
   }
 
   async create(data: CreateUserDto) {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await bcrypt.hash(
+      data.password,
+      APP_CONSTANTS.BCRYPT_SALT_ROUNDS,
+    );
     return this.prisma.user.create({
       data: { ...data, password: hashedPassword },
     });
@@ -50,7 +58,10 @@ export class UsersService {
       throw new BadRequestException('Invalid old password');
     }
 
-    const hashedNewPassword = await bcrypt.hash(dto.newPassword, 10);
+    const hashedNewPassword = await bcrypt.hash(
+      dto.newPassword,
+      APP_CONSTANTS.BCRYPT_SALT_ROUNDS,
+    );
     await this.prisma.user.update({
       where: { id: userId },
       data: { password: hashedNewPassword },

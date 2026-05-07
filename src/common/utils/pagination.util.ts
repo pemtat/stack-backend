@@ -1,9 +1,11 @@
+import { PaginationMeta } from '../interfaces/pagination.interface';
+
 export const createPaginationMeta = (
   totalItems: number,
   page: number,
   limit: number,
   itemCount: number,
-) => {
+): PaginationMeta => {
   const lastPage = Math.ceil(totalItems / limit);
   return {
     totalItems,
