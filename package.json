@@ -97,10 +97,13 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@firebase/util",
       "@nestjs/core",
       "@prisma/engines",
+      "@scarf/scarf",
       "bcrypt",
       "prisma",
+      "protobufjs",
       "unrs-resolver"
     ]
   }
